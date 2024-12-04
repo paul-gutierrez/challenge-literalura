@@ -1,13 +1,16 @@
 package com.paul_gutierrez.challenge_literalura.principal;
 
+import com.paul_gutierrez.challenge_literalura.model.Autor;
 import com.paul_gutierrez.challenge_literalura.model.DatosLibro;
 import com.paul_gutierrez.challenge_literalura.model.Libro;
+import com.paul_gutierrez.challenge_literalura.repository.AutorRepository;
 import com.paul_gutierrez.challenge_literalura.repository.LibroRepository;
 import com.paul_gutierrez.challenge_literalura.service.ConsumoAPI;
 import com.paul_gutierrez.challenge_literalura.service.ConvierteDatos;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Principal {
@@ -15,10 +18,12 @@ public class Principal {
     private ConsumoAPI consumoAPI = new ConsumoAPI();
     private ConvierteDatos conversor = new ConvierteDatos();
     private final String URL_BASE = "https://gutendex.com/books/";
-    private LibroRepository repository;
+    private LibroRepository libroRepository;
+    private AutorRepository autorRepository;
 
-    public Principal(LibroRepository repository) {
-        this.repository = repository;
+    public Principal(LibroRepository libroRepository, AutorRepository autorRepository) {
+        this.libroRepository = libroRepository;
+        this.autorRepository = autorRepository;
     }
 
     public void muestraElMenu() {
@@ -42,10 +47,10 @@ public class Principal {
                     buscarLibroPorTitulo();
                     break;
                 case 2:
-                    // buscarLibroPorIdioma();
+                    mostrarLibrosRegistrados();
                     break;
                 case 3:
-                    // mostrarLibrosBuscados();
+                    mostrarAutoresRegistrados();
                     break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
@@ -110,7 +115,7 @@ public class Principal {
         }
 
         // Verificar si el libro ya existe en la base de datos
-        if (repository.existsByTitulo(datosLibro.titulo())) {
+        if (libroRepository.existsByTitulo(datosLibro.titulo())) {
             System.out.println("El libro ya está registrado en la base de datos: " + datosLibro.titulo());
             return;
         }
@@ -118,10 +123,37 @@ public class Principal {
         // Intentar guardar el libro
         Libro libro = new Libro(datosLibro);
         try {
-            repository.save(libro);
+            libroRepository.save(libro);
             System.out.println("Libro guardado exitosamente: " + libro.getTitulo());
         } catch (Exception e) {
             System.out.println("Ocurrió un error al guardar el libro: " + e.getMessage());
+        }
+    }
+
+    private void mostrarLibrosRegistrados() {
+        List<Libro> listaLibros = libroRepository.findAll();
+
+        // Verificar si hay libros en la lista
+        if (listaLibros.isEmpty()) {
+            System.out.println("No se han encontrado libros registrados.");
+        } else {
+            System.out.println("Libros registrados:");
+            listaLibros.forEach(libro -> {
+                System.out.println(libro);
+                System.out.println();
+            });
+        }
+    }
+
+    private void mostrarAutoresRegistrados() {
+        List<Autor> listaAutores = autorRepository.findAll();
+
+        // Verificar si hay autores en la lista
+        if (listaAutores.isEmpty()) {
+            System.out.println("No se han encontrado autores registrados.");
+        } else {
+            System.out.println("Autores registrados:");
+            listaAutores.forEach(autor -> System.out.println(autor.getNombre()));
         }
     }
 }

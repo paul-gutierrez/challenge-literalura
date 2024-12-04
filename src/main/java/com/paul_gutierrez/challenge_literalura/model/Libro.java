@@ -3,6 +3,7 @@ package com.paul_gutierrez.challenge_literalura.model;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "libros")
@@ -14,7 +15,7 @@ public class Libro {
     @Column(unique = true)
     private String titulo;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "libro_autores",
             joinColumns = @JoinColumn(name = "libro_id"),
@@ -28,7 +29,7 @@ public class Libro {
     @Column(name = "tema")
     private List<String> temas;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "libro_idiomas", joinColumns = @JoinColumn(name = "libro_id"))
     @Column(name = "idioma")
     private List<String> idiomas;
@@ -88,6 +89,21 @@ public class Libro {
 
     public void setIdiomas(List<String> idiomas) {
         this.idiomas = idiomas;
+    }
+
+    @Override
+    public String toString() {
+        // Cadena con solo los nombres de los autores
+        String autoresNombres = autores.stream()
+                .map(Autor::getNombre)
+                .collect(Collectors.joining(", "));
+
+        return "----- Ficha Bibliográfica -----\n" +
+                "Título: " + titulo + "\n" +
+                "Autores: " + autoresNombres + "\n" +
+                "Idiomas: " + String.join(", ", idiomas) + "\n" +
+                "Número de descargas: " + numeroDeDescargas + "\n" +
+                "-------------------------------";
     }
 
     public Integer getNumeroDeDescargas() {
