@@ -1,6 +1,7 @@
 package com.paul_gutierrez.challenge_literalura.principal;
 
 import com.paul_gutierrez.challenge_literalura.model.Autor;
+import com.paul_gutierrez.challenge_literalura.model.DatosAutor;
 import com.paul_gutierrez.challenge_literalura.model.DatosLibro;
 import com.paul_gutierrez.challenge_literalura.model.Libro;
 import com.paul_gutierrez.challenge_literalura.repository.AutorRepository;
@@ -10,6 +11,7 @@ import com.paul_gutierrez.challenge_literalura.service.ConvierteDatos;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -84,7 +86,7 @@ public class Principal {
                 DatosLibro datosLibro = conversor.obtenerDatos(primerResultadoString, DatosLibro.class);
 
                 // Mostrar el título del libro encontrado
-                System.out.println("Título encontrado: " + datosLibro.titulo());
+                System.out.println("Título encontrado: \n" + datosLibro);
                 System.out.println("¿Es este el libro que buscabas? (sí/no)");
 
                 // Confirmar la elección del usuario
@@ -114,20 +116,33 @@ public class Principal {
             return;
         }
 
-        // Verificar si el libro ya existe en la base de datos
         if (libroRepository.existsByTitulo(datosLibro.titulo())) {
             System.out.println("El libro ya está registrado en la base de datos: " + datosLibro.titulo());
             return;
         }
 
-        // Intentar guardar el libro
+        // Crear y guardar el libro
         Libro libro = new Libro(datosLibro);
-        try {
-            libroRepository.save(libro);
-            System.out.println("Libro guardado exitosamente: " + libro.getTitulo());
-        } catch (Exception e) {
-            System.out.println("Ocurrió un error al guardar el libro: " + e.getMessage());
+        libro.setAutores(new ArrayList<>()); // Inicia vacío para gestionar autores manualmente
+        libro = libroRepository.save(libro);
+
+        for (DatosAutor datosAutor : datosLibro.autores()) {
+            Autor autor = autorRepository.buscarPorNombre(datosAutor.nombre());
+            if (autor == null) {
+                // Crear y guardar un nuevo autor
+                autor = new Autor(
+                        datosAutor.nombre(),
+                        datosAutor.anioNacimiento(),
+                        datosAutor.anioFallecimiento()
+                );
+                autor = autorRepository.save(autor);
+            }
+
+            // Insertar la relación manualmente
+            libroRepository.insertarRelacionLibroAutor(libro.getId(), autor.getId());
         }
+
+        System.out.println("Libro guardado exitosamente: " + libro.getTitulo());
     }
 
     private void mostrarLibrosRegistrados() {
@@ -153,7 +168,10 @@ public class Principal {
             System.out.println("No se han encontrado autores registrados.");
         } else {
             System.out.println("Autores registrados:");
-            listaAutores.forEach(autor -> System.out.println(autor.getNombre()));
+            listaAutores.forEach(autor -> {
+                System.out.println(autor);
+                System.out.println();
+            });
         }
     }
 }

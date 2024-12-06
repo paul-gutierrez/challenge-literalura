@@ -2,6 +2,7 @@ package com.paul_gutierrez.challenge_literalura.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,6 @@ public class Libro {
     )
     private List<Autor> autores;
 
-
     @ElementCollection
     @CollectionTable(name = "libro_temas", joinColumns = @JoinColumn(name = "libro_id"))
     @Column(name = "tema")
@@ -40,25 +40,21 @@ public class Libro {
 
     public Libro(DatosLibro datosLibro) {
         this.titulo = datosLibro.titulo();
-
-        this.autores = datosLibro.autores().stream()
-                .map(datosAutor -> {
-                    Autor autor = new Autor(
-                            datosAutor.nombre(),
-                            datosAutor.anioNacimiento(),
-                            datosAutor.anioFallecimiento()
-                    );
-                    autor.getLibros().add(this);
-                    return autor;
-                })
-                .toList();
-
         this.temas = datosLibro.temas();
         this.idiomas = datosLibro.idiomas();
         this.numeroDeDescargas = datosLibro.numeroDeDescargas();
+        this.autores = new ArrayList<>();
     }
 
     // Getters y Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getTitulo() {
         return titulo;
     }
