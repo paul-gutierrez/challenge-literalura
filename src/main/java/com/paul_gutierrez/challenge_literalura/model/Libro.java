@@ -24,7 +24,7 @@ public class Libro {
     )
     private List<Autor> autores;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "libro_temas", joinColumns = @JoinColumn(name = "libro_id"))
     @Column(name = "tema")
     private List<String> temas;
@@ -92,11 +92,30 @@ public class Libro {
         // Cadena con solo los nombres de los autores
         String autoresNombres = autores.stream()
                 .map(Autor::getNombre)
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.joining(" | "));
+
+        // Manejo de temas: Agrupar en líneas de tres temas
+        String temasTexto;
+        if (temas != null && !temas.isEmpty()) {
+            StringBuilder temasBuilder = new StringBuilder();
+            int temasPorLinea = 2;
+            for (int i = 0; i < temas.size(); i++) {
+                temasBuilder.append(temas.get(i));
+                if ((i + 1) % temasPorLinea == 0 || i == temas.size() - 1) {
+                    temasBuilder.append("\n       "); // Salto de línea con identación
+                } else {
+                    temasBuilder.append(" | ");
+                }
+            }
+            temasTexto = temasBuilder.toString().trim();
+        } else {
+            temasTexto = "Sin temas";
+        }
 
         return "----- Ficha Bibliográfica -----\n" +
                 "Título: " + titulo + "\n" +
                 "Autores: " + autoresNombres + "\n" +
+                "Temas: " + temasTexto + "\n" +
                 "Idiomas: " + String.join(", ", idiomas) + "\n" +
                 "Número de descargas: " + numeroDeDescargas + "\n" +
                 "-------------------------------";

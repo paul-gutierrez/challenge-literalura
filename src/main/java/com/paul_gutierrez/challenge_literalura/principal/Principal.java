@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Principal {
     private Scanner scanner = new Scanner(System.in);
@@ -32,9 +33,13 @@ public class Principal {
         var opcion = -1;
         while (opcion != 0) {
             var menu = """
+                ----------------------------------------
+                BIENVENIDO AL GESTOR DE LIBROS Y AUTORES
+                ----------------------------------------
+                Por favor, selecciona una opción:
                 1 - Buscar libro por título
                 2 - Mostrar libros registrados
-                3 - Mostrar autores resgtrados
+                3 - Mostrar autores registrados
                 4 - Mostrar autores vivos en determinado año
                 5 - Mostrar libros por idioma
                 0 - Salir
@@ -53,6 +58,9 @@ public class Principal {
                     break;
                 case 3:
                     mostrarAutoresRegistrados();
+                    break;
+                case 4:
+                    mostrarAutoresVivosEnFecha();
                     break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
@@ -86,7 +94,7 @@ public class Principal {
                 DatosLibro datosLibro = conversor.obtenerDatos(primerResultadoString, DatosLibro.class);
 
                 // Mostrar el título del libro encontrado
-                System.out.println("Título encontrado: \n" + datosLibro);
+                System.out.println("Resultado de la búsqueda: \n" + datosLibro);
                 System.out.println("¿Es este el libro que buscabas? (sí/no)");
 
                 // Confirmar la elección del usuario
@@ -174,4 +182,37 @@ public class Principal {
             });
         }
     }
+
+    private void mostrarAutoresVivosEnFecha() {
+        System.out.println("Ingrese un año (por ejemplo, 1800): ");
+
+        int anio;
+        try {
+            anio = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Año inválido. Por favor, ingrese un número válido.");
+            return;
+        }
+
+        // Obtener la lista de autores vivos en el año proporcionado
+        List<Autor> autoresVivos = autorRepository.findAll().stream()
+                .filter(autor -> {
+                    Integer nacimiento = autor.getAnioNacimiento();
+                    Integer fallecimiento = autor.getAnioFallecimiento();
+                    return (nacimiento != null && nacimiento <= anio) &&
+                            (fallecimiento == null || fallecimiento >= anio);
+                })
+                .collect(Collectors.toList());
+
+        if (autoresVivos.isEmpty()) {
+            System.out.println("No se encontraron autores vivos en el año: " + anio);
+        } else {
+            System.out.println("Autores vivos en el año " + anio + ":");
+            autoresVivos.forEach(autor -> {
+                System.out.println(autor);
+                System.out.println();
+            });
+        }
+    }
+
 }
