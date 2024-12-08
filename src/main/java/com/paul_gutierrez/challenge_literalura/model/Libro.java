@@ -46,6 +46,7 @@ public class Libro {
         this.autores = new ArrayList<>();
     }
 
+
     // Getters y Setters
     public Long getId() {
         return id;

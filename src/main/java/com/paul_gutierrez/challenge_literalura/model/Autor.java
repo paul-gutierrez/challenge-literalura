@@ -76,7 +76,7 @@ public class Autor {
         // Convertir la lista de libros a una lista de títulos separados por comas
         String librosTexto = libros.isEmpty()
                 ? "Ningún libro registrado"
-                : libros.stream().map(Libro::getTitulo).collect(Collectors.joining(", "));
+                : libros.stream().map(Libro::getTitulo).collect(Collectors.joining(" | "));
 
         return "----- Ficha de Autor -----\n" +
                 "Autor: " + nombre + "\n" +

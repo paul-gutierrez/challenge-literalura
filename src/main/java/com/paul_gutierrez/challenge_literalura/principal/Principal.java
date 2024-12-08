@@ -11,9 +11,7 @@ import com.paul_gutierrez.challenge_literalura.service.ConvierteDatos;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Principal {
@@ -61,6 +59,9 @@ public class Principal {
                     break;
                 case 4:
                     mostrarAutoresVivosEnFecha();
+                    break;
+                case 5:
+                    mostrarLibrosPorIdioma();
                     break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
@@ -215,4 +216,66 @@ public class Principal {
         }
     }
 
+    private Set<String> obtenerIdiomasDisponibles() {
+        // Obtener todos los libros desde la base de datos
+        List<Libro> listaLibros = libroRepository.findAll();
+
+        // Usar streams para obtener idiomas únicos
+        return listaLibros.stream()
+                .flatMap(libro -> libro.getIdiomas().stream())
+                .collect(Collectors.toSet());
+    }
+
+    private void mostrarLibrosPorIdioma() {
+        // Obtener los idiomas disponibles
+        Set<String> idiomasDisponibles = obtenerIdiomasDisponibles();
+
+        if (idiomasDisponibles.isEmpty()) {
+            System.out.println("No hay idiomas disponibles porque no hay libros registrados.");
+            return;
+        }
+
+        // Mostrar el menú de idiomas
+        System.out.println("Idiomas disponibles:");
+        List<String> listaIdiomas = new ArrayList<>(idiomasDisponibles);
+        for (int i = 0; i < listaIdiomas.size(); i++) {
+            System.out.println((i + 1) + ". " + listaIdiomas.get(i));
+        }
+
+        // Pedir al usuario que seleccione un idioma
+        System.out.print("Seleccione un idioma (número): ");
+        int opcion;
+        try {
+            opcion = scanner.nextInt();
+            scanner.nextLine(); // Consumir el salto de línea
+        } catch (InputMismatchException e) {
+            System.out.println("Entrada inválida. Intente de nuevo.");
+            scanner.nextLine(); // Consumir entrada incorrecta
+            return;
+        }
+
+        // Validar la opción
+        if (opcion < 1 || opcion > listaIdiomas.size()) {
+            System.out.println("Opción inválida.");
+            return;
+        }
+
+        // Obtener el idioma seleccionado
+        String idiomaSeleccionado = listaIdiomas.get(opcion - 1);
+
+        // Filtrar y mostrar los libros en ese idioma
+        List<Libro> librosEnIdioma = libroRepository.findAll().stream()
+                .filter(libro -> libro.getIdiomas().contains(idiomaSeleccionado))
+                .collect(Collectors.toList());
+
+        if (librosEnIdioma.isEmpty()) {
+            System.out.println("No hay libros disponibles en el idioma seleccionado: " + idiomaSeleccionado);
+        } else {
+            System.out.println("Libros disponibles en el idioma \"" + idiomaSeleccionado + "\":");
+            librosEnIdioma.forEach(libro -> {
+                System.out.println(libro);
+                System.out.println();
+            });
+        }
+    }
 }
