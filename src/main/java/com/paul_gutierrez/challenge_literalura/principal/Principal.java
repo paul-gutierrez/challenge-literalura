@@ -32,7 +32,7 @@ public class Principal {
         while (opcion != 0) {
             var menu = """
                 ----------------------------------------
-                BIENVENIDO AL GESTOR DE LIBROS Y AUTORES
+                        BIENVENIDO A LIBROTRACK
                 ----------------------------------------
                 Por favor, selecciona una opción:
                 1 - Buscar libro por título
@@ -45,7 +45,7 @@ public class Principal {
             System.out.print(menu);
             System.out.print("->");
             opcion = scanner.nextInt();
-            scanner.nextLine(); // Consumir el salto de línea
+            scanner.nextLine();
 
             switch (opcion) {
                 case 1:
@@ -94,7 +94,6 @@ public class Principal {
                 // Convertir a DatosLibro
                 DatosLibro datosLibro = conversor.obtenerDatos(primerResultadoString, DatosLibro.class);
 
-                // Mostrar el título del libro encontrado
                 System.out.println("Resultado de la búsqueda: \n" + datosLibro);
                 System.out.println("¿Es este el libro que buscabas? (sí/no)");
 
@@ -132,7 +131,7 @@ public class Principal {
 
         // Crear y guardar el libro
         Libro libro = new Libro(datosLibro);
-        libro.setAutores(new ArrayList<>()); // Inicia vacío para gestionar autores manualmente
+        libro.setAutores(new ArrayList<>());
         libro = libroRepository.save(libro);
 
         for (DatosAutor datosAutor : datosLibro.autores()) {
@@ -147,7 +146,6 @@ public class Principal {
                 autor = autorRepository.save(autor);
             }
 
-            // Insertar la relación manualmente
             libroRepository.insertarRelacionLibroAutor(libro.getId(), autor.getId());
         }
 
@@ -217,10 +215,9 @@ public class Principal {
     }
 
     private Set<String> obtenerIdiomasDisponibles() {
-        // Obtener todos los libros desde la base de datos
         List<Libro> listaLibros = libroRepository.findAll();
 
-        // Usar streams para obtener idiomas únicos
+        // Obtener idiomas únicos
         return listaLibros.stream()
                 .flatMap(libro -> libro.getIdiomas().stream())
                 .collect(Collectors.toSet());
@@ -235,22 +232,20 @@ public class Principal {
             return;
         }
 
-        // Mostrar el menú de idiomas
         System.out.println("Idiomas disponibles:");
         List<String> listaIdiomas = new ArrayList<>(idiomasDisponibles);
         for (int i = 0; i < listaIdiomas.size(); i++) {
             System.out.println((i + 1) + ". " + listaIdiomas.get(i));
         }
 
-        // Pedir al usuario que seleccione un idioma
         System.out.print("Seleccione un idioma (número): ");
         int opcion;
         try {
             opcion = scanner.nextInt();
-            scanner.nextLine(); // Consumir el salto de línea
+            scanner.nextLine();
         } catch (InputMismatchException e) {
             System.out.println("Entrada inválida. Intente de nuevo.");
-            scanner.nextLine(); // Consumir entrada incorrecta
+            scanner.nextLine();
             return;
         }
 

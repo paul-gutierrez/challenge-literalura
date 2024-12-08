@@ -95,7 +95,7 @@ public class Libro {
                 .map(Autor::getNombre)
                 .collect(Collectors.joining(" | "));
 
-        // Manejo de temas: Agrupar en líneas de tres temas
+        // Manejo de temas: Agrupar en líneas de dos temas
         String temasTexto;
         if (temas != null && !temas.isEmpty()) {
             StringBuilder temasBuilder = new StringBuilder();
